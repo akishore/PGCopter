@@ -40,7 +40,7 @@ var main = function(game){}
 			game.load.image('explosion', 'assets/explosion.jpg');  
 			
 			// //Load audio
-			// game.load.audio('blaster', 'assets/audio/blaster.mp3');
+			game.load.audio('blaster', 'assets/audio/blaster.mp3');
 		},
 
 		// Fuction called after 'preload' to setup the game 
@@ -163,7 +163,7 @@ var main = function(game){}
 		if (gameAlive == true){
 			// Add a vertical velocity to the player
 			player.body.velocity.y = -250;
-			//blaster.play();
+			blaster.play();
 		}
 		else{
 			player.body.velocity.y = 0;
