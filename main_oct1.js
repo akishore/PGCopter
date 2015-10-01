@@ -16,10 +16,9 @@ var main = function(game){}
 		// Function called first to load all the assets
 		preload: function() { 
 			// Change the background color of the game
-			//game.stage.backgroundColor = '#000';
+			game.stage.backgroundColor = '#000';
 			
-			game.load.image("background", "assets/raining.jpg");
-			game.load.image("background2", "assets/Tulips.jpg");
+			//game.load.image("background", "assets/raining.jpg");
 			
 			// Load the player sprite
 			game.load.image('player', 'assets/player.png');  
@@ -52,8 +51,7 @@ var main = function(game){}
 			// dynamite.enableBody = true;
 			// dynamite.createMultiple(4, 'dynamite'); 
 			
-			game.add.tileSprite(0, 0, 1000, 600, 'background');
-			background2 = game.add.tileSprite(889, 0, 1000, 600, 'background2');
+			//game.add.tileSprite(0, 0, 1000, 600, 'background');
 		
 			// Create a group of 60 pipes
 			pipes = game.add.group();
@@ -89,7 +87,6 @@ var main = function(game){}
 			timer = game.time.events.loop(pipesTime, addObstacles, this);  
 			
 			timer = game.time.events.loop(500, moveVerticalPipes, this); 
-			timer = game.time.events.loop(1000, updateBackground, this); 
 		
 			// addVerticalPipes();
 			// timer = game.time.events.loop(2000, addVerticalPipes, this);
@@ -123,6 +120,10 @@ var main = function(game){}
 				gameOver(); 
 			}
 			
+			if (score > 10){
+				game.stage.backgroundColor = '#FF0';
+			}
+			
 			// If the player overlap any pipes, call 'gameOver'
 			game.physics.arcade.overlap(player, pipes, gameOver, null, this); 
 		
@@ -142,12 +143,6 @@ var main = function(game){}
    
 	game.state.add("Main",main);
     game.state.start("Main");
-	
-	function updateBackground(){
-		var tween = game.add.tween(background2).to({ x: 0}, 1000);
-		tween.start();
-		
-	}
 	
 	function addVerticalPipes(){
 		verticalSprite = game.add.sprite(889, 200, 'verticalObstacle');
