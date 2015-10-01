@@ -18,8 +18,6 @@ var main = function(game){}
 			// Change the background color of the game
 			game.stage.backgroundColor = '#000';
 			
-			//game.load.image("background", "assets/raining.jpg");
-			
 			// Load the player sprite
 			game.load.image('player', 'assets/player.png');  
 
@@ -42,7 +40,7 @@ var main = function(game){}
 			game.load.image('explosion', 'assets/explosion.jpg');  
 			
 			// //Load audio
-			// game.load.audio('blaster', 'assets/audio/blaster.mp3');
+			game.load.audio('blaster', 'assets/audio/blaster.mp3');
 		},
 
 		// Fuction called after 'preload' to setup the game 
@@ -50,8 +48,6 @@ var main = function(game){}
 			// dynamite = game.add.group();
 			// dynamite.enableBody = true;
 			// dynamite.createMultiple(4, 'dynamite'); 
-			
-			//game.add.tileSprite(0, 0, 1000, 600, 'background');
 		
 			// Create a group of 60 pipes
 			pipes = game.add.group();
@@ -121,7 +117,7 @@ var main = function(game){}
 			}
 			
 			if (score > 10){
-				game.stage.backgroundColor = '#FF0';
+				pipesTime = 500;
 			}
 			
 			// If the player overlap any pipes, call 'gameOver'
@@ -167,7 +163,7 @@ var main = function(game){}
 		if (gameAlive == true){
 			// Add a vertical velocity to the player
 			player.body.velocity.y = -250;
-			//blaster.play();
+			blaster.play();
 		}
 		else{
 			player.body.velocity.y = 0;
@@ -221,11 +217,34 @@ var main = function(game){}
         pipe.reset(x, y);
 
         // Add velocity to the pipe to make it move left
-		pipe.body.velocity.x = -200; 
-		if (verticalSprite != undefined){
-			verticalSprite.body.velocity.x = -200;
+		if (score < 10){
+			pipe.body.velocity.x = -300; 
+			if (verticalSprite != undefined){
+				verticalSprite.body.velocity.x = -400;
+			}
 		}
 		
+		else if (score >= 10 && score < 20){
+			pipe.body.velocity.x = -400; 
+			if (verticalSprite != undefined){
+				verticalSprite.body.velocity.x = -500;
+			}
+		}
+		
+		else if (score >= 20 && score <30){
+			pipe.body.velocity.x = -500;
+			if (verticalSprite != undefined){
+				verticalSprite.body.velocity.x = -600;
+			}
+		}
+		
+		else if (score >= 30){
+			pipe.body.velocity.x = -600; 
+			if (verticalSprite != undefined){
+				verticalSprite.body.velocity.x = -700;
+			}
+		}
+               
         // Kill the pipe when it's no longer visible 
         pipe.checkWorldBounds = true;
         pipe.outOfBoundsKill = true;
