@@ -23,7 +23,6 @@ var main = function(game){}
 		preload: function() { 
 			// Change the background color of the game	
 			game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-			game.scale.scaleMode =Phaser.ScaleManager.NO_BORDER;
 			game.scale.setScreenSize(true);
 			
 			game.load.image("layer1", "assets/layer-1_small.png");
@@ -46,7 +45,7 @@ var main = function(game){}
 		create: function() { 		
 			//collision = game.add.audio('collision');		
 			// // // layers = game.add.group();
-			layer1 = game.add.sprite(-10, -10, 'layer1');
+			layer1 = game.add.sprite(0, 0, 'layer1');
 			layer1_dup = game.add.sprite(900, 0, 'layer1');
 			// // // layers.add(layer1);
 			// // // // layer1.z = 0;
