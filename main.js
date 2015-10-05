@@ -12,7 +12,7 @@ var pipe;
 var pipesTime = 2927;
 var score;
 var countLeft = 0;
-var verticalSprite;
+//var verticalSprite;
 var build;
 var skip = 0;
 
@@ -77,32 +77,33 @@ var main = function(game){}
 			pipes3.enableBody = true;
 			pipes3.createMultiple(60, 'pipe2'); 
 			
-			building = game.add.group();
+			//building = game.add.group();
 			
 			// Create a group of 60 pipes
 			buildingBase = game.add.group();
 			buildingBase.enableBody = true;
 			buildingBase.createMultiple(20, 'buildingBase'); 
 			
-			building.add(buildingBase);
+			//building.add(buildingBase);
 			
 			// Create a group of 60 pipes
 			buildingFloor = game.add.group();
 			buildingFloor.enableBody = true;
+			buildingFloor.enableBodyDebug = true;
 			buildingFloor.createMultiple(60, 'buildingFloor'); 
 			
-			building.add(buildingFloor);
+			//building.add(buildingFloor);
 			
 			// Create a group of 60 pipes
 			buildingTop = game.add.group();
 			buildingTop.enableBody = true;
 			buildingTop.createMultiple(20, 'buildingTop'); 
 			
-			building.add(buildingTop);
+			//building.add(buildingTop);
 			
-			building.enableBody = true;
+			//building.enableBody = true;
 		
-			verticalSprites = game.add.group();
+			//verticalSprites = game.add.group();
 			
 		
 			// extraPoints = game.add.group();
@@ -326,11 +327,11 @@ var main = function(game){}
 		},this);
 		
 
-		verticalSprites.forEach(function(verticalPipes){
-			if(verticalPipes.inWorld == true){
-				verticalPipes.body.velocity.x = 0;
-			}
-		},this);
+		// verticalSprites.forEach(function(verticalPipes){
+			// if(verticalPipes.inWorld == true){
+				// verticalPipes.body.velocity.x = 0;
+			// }
+		// },this);
 			
 		
 		player.body.velocity.y = 0;
@@ -347,6 +348,7 @@ var main = function(game){}
 		//end try
 		function restart() {
 			gameAlive = true;
+			skip = 0;
 			game.state.start("Main");	
 		}
 	}
@@ -396,26 +398,47 @@ var main = function(game){}
 		}
     }
 	
+	function addOneFloor(i){
+		buildingFloorPassed = buildingFloor.getFirstDead();
+		buildingFloorPassed.reset(889,420-(i*30));
+		buildingFloorPassed.body.velocity.x = -200;
+		buildingFloorPassed.checkWorldBounds = true;
+		buildingFloorPassed.outOfBoundsKill = true;
+	}
+	
+	function addOneTop(i){
+		buildingTopPassed = buildingTop.getFirstDead();
+		buildingTopPassed.reset(889,(410-((i-1)*30)));
+		buildingTopPassed.body.velocity.x = -200;
+		buildingTopPassed.giveScore = true;
+		buildingTopPassed.checkWorldBounds = true;
+        buildingTopPassed.outOfBoundsKill = true;
+	}
+	
+	function addOneBase(){
+		buildingBasePassed = buildingBase.getFirstDead();
+		buildingBasePassed.reset(889,450);
+		buildingBasePassed.body.velocity.x = -200;
+		buildingBasePassed.checkWorldBounds = true;
+        buildingBasePassed.outOfBoundsKill = true;
+		
+	}
+	
 	function addFloorsOfBuilding() {
 		if (gameAlive == true){
-			build = building.getFirstDead();
-			var floors = Math.floor(Math.random()* 3)+4;
-			buildingBasePassed = buildingBase.getFirstDead();
-			buildingTopPassed = buildingTop.getFirstDead();
+			// build = building.getFirstDead();
+			var floors = Math.floor(Math.random()* 3)+3;
 			
-			buildingBasePassed.reset(889,470);
+			addOneBase();
+			
 			for (var i= 0; i<floors; i++){
-				buildingFloorPassed = buildingFloor.getFirstDead();
-				buildingFloorPassed.reset(889,470-(i*30));
-				buildingFloorPassed.body.velocity.x = -200;
+				addOneFloor(i);
 			}
-			buildingTopPassed.reset(889,(490-(floors*30)));
 			
-			buildingBasePassed.body.velocity.x = -200;
+			addOneTop(i);
 			
-			buildingTopPassed.body.velocity.x = -200;
-			buildingTopPassed.giveScore = true;
 		}
+
 	}
 	
 	
@@ -462,13 +485,13 @@ var main = function(game){}
 			}
 		},this);
 		
-		verticalSprites.forEach(function(verticalSpriteCount){
-			if (verticalSpriteCount.inWorld == true && verticalSpriteCount.x+verticalSpriteCount.width<player.x && verticalSpriteCount.giveScore){
-				score += 1;
-				updateScore();
-				verticalSpriteCount.giveScore = false;
-			}
-		},this);
+		// verticalSprites.forEach(function(verticalSpriteCount){
+			// if (verticalSpriteCount.inWorld == true && verticalSpriteCount.x+verticalSpriteCount.width<player.x && verticalSpriteCount.giveScore){
+				// score += 1;
+				// updateScore();
+				// verticalSpriteCount.giveScore = false;
+			// }
+		// },this);
 	}
 	
 	// Add extra points when advantageous object is collected
