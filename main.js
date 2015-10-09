@@ -1,20 +1,42 @@
 var innerWidth = window.innerWidth;
 var innerHeight = window.innerHeight;
 var gameRatio = innerWidth/innerHeight;	
-var game = new Phaser.Game(Math.ceil(480*gameRatio), 480, Phaser.AUTO);
+var game = new Phaser.Game(Math.ceil(500*gameRatio), 500, Phaser.AUTO);
 
 // Initialize Phaser, and creates a 400x490px game
-//var game = new Phaser.Game(889, 500, Phaser.AUTO, 'gameDiv');
+// var game = new Phaser.Game(889, 500, Phaser.AUTO, 'gameDiv');
 
 var restartButton;
 var gameAlive = true;
 var pipe;
 var pipesTime = 2927;
 var score;
-var countLeft = 0;
-//var verticalSprite;
+var verticalSprite;
 var build;
 var skip = 0;
+var count = 0;
+var continuousCount = 0;
+var my_media;
+
+var playAudio = function(audioID) {
+	
+	var audioElement = document.getElementById(audioID);
+	if (!typeof new Audio().loop == 'boolean' && audioID === "Plane") {
+		audioElement.addEventListener('ended', function () {
+			this.currentTime = 0;
+			this.play();
+		}, false);
+	}
+	var url = audioElement.getAttribute('src');
+	my_media = new Media(url,
+			// success callback
+			 function () { my_media.release(); },
+			// error callback
+			 function (err) { my_media.release(); }
+	);
+		   // Play audio
+	my_media.play();
+}
 
 var main = function(game){}
 // Creates a new 'main' state that will contain the game
@@ -22,6 +44,7 @@ var main = function(game){}
 		// Function called first to load all the assets
 		preload: function() { 
 			// Change the background color of the game	
+
 			game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 			game.scale.setScreenSize(true);
 			
@@ -34,15 +57,13 @@ var main = function(game){}
 			game.load.image("pipe", "assets/obstacle.png");
 			game.load.image("pipe1", "assets/purpleBalloon.png");
 			game.load.image("pipe2", "assets/brownBalloon.png");
-			game.load.image("buildingBase", "assets/buildingBase.png");
-			game.load.image("buildingFloor", "assets/buildingFloor.png");
-			game.load.image("buildingTop", "assets/buildingTop.png");
 			game.load.image("explosion", "assets/explosion.png");
-			//game.load.audio("collision", "assets/Aadat.mp3");
+			game.load.spritesheet("buildingSprites","assets/spritesheet.png",110,233,5);
+			//game.load.audio("collision", "assets/0897.ogg");
 		},
 
 		// Fuction called after 'preload' to setup the game 
-		create: function() { 		
+		create: function() { 	
 			//collision = game.add.audio('collision');		
 			// // // layers = game.add.group();
 			layer1 = game.add.sprite(0, 0, 'layer1');
@@ -62,6 +83,11 @@ var main = function(game){}
 			layer6 = game.add.sprite(0, 0, 'layer6');
 			layer6_dup = game.add.sprite(1030, 0, 'layer6');
 			
+			buildingFloor3 = game.add.group();
+			buildingFloor4 = game.add.group();
+			buildingFloor5 = game.add.group();
+			buildingFloor6 = game.add.group();
+			
 			// Create a group of 60 pipes
 			pipes1 = game.add.group();
 			pipes1.enableBody = true;
@@ -75,41 +101,24 @@ var main = function(game){}
 			// Create a group of 60 pipes
 			pipes3 = game.add.group();
 			pipes3.enableBody = true;
-			pipes3.createMultiple(60, 'pipe2'); 
-			
-			//building = game.add.group();
-			
-			// Create a group of 60 pipes
-			buildingBase = game.add.group();
-			buildingBase.enableBody = true;
-			buildingBase.createMultiple(20, 'buildingBase'); 
-			
-			//building.add(buildingBase);
-			
-			// Create a group of 60 pipes
-			buildingFloor = game.add.group();
-			buildingFloor.enableBody = true;
-			buildingFloor.enableBodyDebug = true;
-			buildingFloor.createMultiple(60, 'buildingFloor'); 
-			
-			//building.add(buildingFloor);
-			
-			// Create a group of 60 pipes
-			buildingTop = game.add.group();
-			buildingTop.enableBody = true;
-			buildingTop.createMultiple(20, 'buildingTop'); 
-			
-			//building.add(buildingTop);
-			
-			//building.enableBody = true;
-		
-			//verticalSprites = game.add.group();
-			
-		
-			// extraPoints = game.add.group();
-			// extraPoints.enableBody = true;
-			// extraPoints.createMultiple(2, 'extraPoints');  
+			pipes3.createMultiple(60, 'pipe2');
 
+			building3 = game.add.sprite(1289, 200, 'buildingSprites',2);
+			game.physics.arcade.enable(building3);
+			building3.giveScore = true;
+			
+			building4 = game.add.sprite(1289, 200, 'buildingSprites',3);
+			game.physics.arcade.enable(building4);
+			building4.giveScore = true;
+			
+			building5 = game.add.sprite(1289, 200, 'buildingSprites',4);
+			game.physics.arcade.enable(building5);
+			building5.giveScore = true;
+			
+			building6 = game.add.sprite(1289, 200, 'buildingSprites',5);
+			game.physics.arcade.enable(building6);
+			building6.giveScore = true;
+				
 			extraPoints = game.add.sprite(150,-30,'extraPoints');
 			game.physics.enable(extraPoints,Phaser.Physics.ARCADE)
 			extraPoints.visible = false;
@@ -132,24 +141,15 @@ var main = function(game){}
 			// Timer that calls 'addRowOfPipes' ever 2 seconds 
 			timer = game.time.events.loop(pipesTime, addObstacles, this);  
 			
-			//timer = game.time.events.loop(500, moveVerticalObstacle, this); 
-			
-			// addVerticalPipes();
-			//timer = game.time.events.loop(6300, addVerticalObstacle, this);
-			
 			timer = game.time.events.loop(3967, addFloorsOfBuilding, this);
 			
 			score = 0;
-			// if (score <= 10){
-				// pipesTime = 2000;
-				// timer = game.time.events.loop(pipesTime, addRowOfPipes, this);  
-			// }
-			// else{
-				// pipesTime = 1000;
-				//timer = game.time.events.loop(pipesTime, addRowOfPipes, this);  
-			// }
+			functionCalled = 0;
 			
-			timer = game.time.events.loop(3000, addObjects, this);  
+			//timer = game.time.events.loop(3000, addObjects, this); 
+
+			playAudio("Plane");
+			//timer = game.time.events.loop(15000, playPlaneSound, this);  
 			
 			topScore = localStorage.getItem("topScore")==null?0:localStorage.getItem("topScore");
 			scoreText = game.add.text(10,10,"-",{
@@ -165,8 +165,6 @@ var main = function(game){}
 		update: function() {
 			moveBackground(layer2,layer3,layer6);
 			moveBackground(layer2_dup,layer3_dup,layer6_dup);
-			//moveBackground(layer6);
-			// moveBackground(layer6_dup);
 			
 			// If the player is out of the world (too high or too low), call the 'restartGame' function
 			if (player.inWorld == false){
@@ -180,11 +178,13 @@ var main = function(game){}
 			
 			game.physics.arcade.overlap(player, pipes3, gameOver, null, this); 
 			
-			game.physics.arcade.overlap(player, buildingBase, gameOver, null, this); 
+			game.physics.arcade.overlap(player, building3, gameOver, null, this); 
 			
-			game.physics.arcade.overlap(player, buildingFloor, gameOver, null, this); 
+			game.physics.arcade.overlap(player, building4, gameOver, null, this); 
 			
-			game.physics.arcade.overlap(player, buildingTop, gameOver, null, this); 
+			game.physics.arcade.overlap(player, building5, gameOver, null, this); 
+			
+			game.physics.arcade.overlap(player, building6, gameOver, null, this); 
 		
 			// If the player overlap any flying objects, call 'addScore'
 			game.physics.arcade.overlap(player, extraPoints, addScore, null, this);
@@ -196,17 +196,17 @@ var main = function(game){}
    function moveBackground(layer2,layer3,layer6){
 	   if (layer2.x < -980){
 			layer2.x = 980;	
-			layer2.x -= 2;
+			layer2.x -= 3;
 		}
 		else{
-			layer2.x -= 2;
+			layer2.x -= 3;
 		}
 		if (layer3.x < -1000){
 			layer3.x = 1000;	
-			layer3.x -= 1.5;
+			layer3.x -= 2;
 		}
 		else{
-			layer3.x -= 1.5;
+			layer3.x -= 2;
 		}
 		if (layer6.x < -980){
 			layer6.x = 980;	
@@ -220,6 +220,10 @@ var main = function(game){}
    
 	game.state.add("Main",main);
     game.state.start("Main");
+	
+	function playPlaneSound(){
+		playAudio("Plane");
+	}
 	
 	function addVerticalObstacle(){
 		if (gameAlive === true){
@@ -265,11 +269,6 @@ var main = function(game){}
 		
 	}
 	
-	// function moveVerticalObstacle(){
-		// var tween = game.add.tween(extraPoints).to({ x: 500,y: 500}, 3000);
-		// tween.start();
-	// }
-	
 	function updateScore(){
 		scoreText.text = "Score: "+score+"\nBest: "+topScore;	
 	}
@@ -289,11 +288,16 @@ var main = function(game){}
     }
 	
 	function gameOver() {
+		my_media.pause();
 		gameAlive = false;
 		skip = 0;
+		functionCalled = functionCalled+1;
 		localStorage.setItem("topScore",Math.max(score,topScore));	
-		//playAudio("DiceRollAudio");
-		//player.animations.play('explode');
+		
+		if (functionCalled === 1){
+			playAudio("Collision");
+		}
+		
 		pipes1.forEach(function(pipe){
 			if(pipe.inWorld == true){
 				pipe.body.velocity.x = 0;
@@ -310,29 +314,18 @@ var main = function(game){}
 			}
 		},this);
 		
-		buildingBase.forEach(function(build){
-			if(build.inWorld == true){
-				build.body.velocity.x = 0;
-			}
-		},this);
-		buildingFloor.forEach(function(build){
-			if(build.inWorld == true){
-				build.body.velocity.x = 0;
-			}
-		},this);
-		buildingTop.forEach(function(build){
-			if(build.inWorld == true){
-				build.body.velocity.x = 0;
-			}
-		},this);
-		
-
-		// verticalSprites.forEach(function(verticalPipes){
-			// if(verticalPipes.inWorld == true){
-				// verticalPipes.body.velocity.x = 0;
-			// }
-		// },this);
-			
+		if (building3.inWorld === true){
+			building3.body.velocity.x = 0;
+		}
+		if (building4.inWorld === true){
+			building4.body.velocity.x = 0;
+		}
+		if (building5.inWorld === true){
+			building5.body.velocity.x = 0;
+		}
+		if (building6.inWorld === true){
+			building6.body.velocity.x = 0;
+		}
 		
 		player.body.velocity.y = 0;
 		player.body.gravity.y = 0; 
@@ -347,9 +340,10 @@ var main = function(game){}
 
 		//end try
 		function restart() {
+			my_media.pause();
 			gameAlive = true;
 			skip = 0;
-			game.state.start("Main");	
+			game.state.start("Main",true,false);	
 		}
 	}
 	
@@ -398,50 +392,46 @@ var main = function(game){}
 		}
     }
 	
-	function addOneFloor(i){
-		buildingFloorPassed = buildingFloor.getFirstDead();
-		buildingFloorPassed.reset(889,420-(i*30));
-		buildingFloorPassed.body.velocity.x = -200;
-		buildingFloorPassed.checkWorldBounds = true;
-		buildingFloorPassed.outOfBoundsKill = true;
-	}
-	
-	function addOneTop(i){
-		buildingTopPassed = buildingTop.getFirstDead();
-		buildingTopPassed.reset(889,(410-((i-1)*30)));
-		buildingTopPassed.body.velocity.x = -200;
-		buildingTopPassed.giveScore = true;
-		buildingTopPassed.checkWorldBounds = true;
-        buildingTopPassed.outOfBoundsKill = true;
-	}
-	
-	function addOneBase(){
-		buildingBasePassed = buildingBase.getFirstDead();
-		buildingBasePassed.reset(889,450);
-		buildingBasePassed.body.velocity.x = -200;
-		buildingBasePassed.checkWorldBounds = true;
-        buildingBasePassed.outOfBoundsKill = true;
-		
-	}
-	
 	function addFloorsOfBuilding() {
 		if (gameAlive == true){
-			// build = building.getFirstDead();
-			var floors = Math.floor(Math.random()* 3)+3;
-			
-			addOneBase();
-			
-			for (var i= 0; i<floors; i++){
-				addOneFloor(i);
+			var floors = Math.floor(Math.random()* 4)+3;
+			if (continuousCount < 4 && count === floors){
+				continuousCount++;
+				addFloorsOfBuilding();
 			}
-			
-			addOneTop(i);
-			
+			else{
+				if (floors === 3){
+					building3.reset(989,(450-110));
+					building3.body.velocity.x = -200;
+					continuousCount = 1;
+					count = floors;
+				}
+				
+				else if (floors === 4){
+					building4.reset(989, (450-141));
+					building4.body.velocity.x = -200;
+					continuousCount = 1;
+					count = floors;
+				}
+				
+				else if (floors === 5){
+					building5.reset(989, (450-171));
+					building5.body.velocity.x = -200;
+					continuousCount = 1;
+					count = floors;
+				}
+				
+				else if (floors === 6){
+					building6.reset(989, (450-203));
+					building6.body.velocity.x = -200;
+					continuousCount = 1;
+					count = floors;
+				}	
+			}
+					
 		}
-
 	}
-	
-	
+		
 	function addObstacles() {
 		if (skip === 3){
 			addVerticalObstacle();
@@ -477,21 +467,28 @@ var main = function(game){}
 			}
 		},this);
 		
-		buildingTop.forEach(function(build){
-			if (build.inWorld == true && build.x+build.width<player.x && build.giveScore){
-				score += 1;
-				updateScore();
-				build.giveScore = false;
-			}
-		},this);
+		if (building3.inWorld === true && building3.x+building3.width<player.x && building3.giveScore){
+			score += 1;
+			updateScore();
+			building3.giveScore = false;
+		}
+		if (building4.inWorld === true && building4.x+building4.width<player.x && building4.giveScore){
+			score += 1;
+			updateScore();
+			building4.giveScore = false;
+		}
+		if (building5.inWorld === true && building5.x+building4.width<player.x && building5.giveScore){
+			score += 1;
+			updateScore();
+			building5.giveScore = false;
+		}
+		if (building6.inWorld === true && building6.x+building6.width<player.x && building6.giveScore){
+			score += 1;
+			updateScore();
+			building6.giveScore = false;
+		}
 		
-		// verticalSprites.forEach(function(verticalSpriteCount){
-			// if (verticalSpriteCount.inWorld == true && verticalSpriteCount.x+verticalSpriteCount.width<player.x && verticalSpriteCount.giveScore){
-				// score += 1;
-				// updateScore();
-				// verticalSpriteCount.giveScore = false;
-			// }
-		// },this);
+		
 	}
 	
 	// Add extra points when advantageous object is collected
